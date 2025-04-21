@@ -1,0 +1,68 @@
+{
+  "project_info": {
+    "project_number": "1056805592677",
+    "project_id": "signupsignin-5aea1",
+    "storage_bucket": "signupsignin-5aea1.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1056805592677:android:ffd05842e1bdf4ecdaf08c",
+        "android_client_info": {
+          "package_name": "com.shreyaspawar.blogapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1056805592677-f0b1j5vh6g99875gs72nt0s0i01h98gs.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCsG6r2lVYVbY1i5DqlZ1O-DWRAwQsfJeo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1056805592677-f0b1j5vh6g99875gs72nt0s0i01h98gs.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1056805592677:android:d9dc07df12b898f4daf08c",
+        "android_client_info": {
+          "package_name": "com.shreyaspawar.registration"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1056805592677-f0b1j5vh6g99875gs72nt0s0i01h98gs.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCsG6r2lVYVbY1i5DqlZ1O-DWRAwQsfJeo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1056805592677-f0b1j5vh6g99875gs72nt0s0i01h98gs.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
