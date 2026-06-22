@@ -24,145 +24,137 @@ class SignInAndRegistrationActivity : AppCompatActivity() {
     private lateinit var storage: FirebaseStorage
     private val PICK_IMAGE_REQUEST = 1
     private var imageUri: Uri? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
-        // Initialize Firebase Authentication
         auth = FirebaseAuth.getInstance()
         database = FirebaseDatabase.getInstance()
-        /*if code not working uncomment this line
-                database = FirebaseDatabase.getInstance("https://blog-app-147b1-default-rtdb.asia-southeast1.firebasedatabase.app")*/
         storage = FirebaseStorage.getInstance()
 
-        // for visibility of field
         val action = intent.getStringExtra("action")
-        // adjust visibility for login
         if (action == "login") {
-            binding.loginEmailAddress.visibility = View.VISIBLE
-            binding.loginPassword.visibility = View.VISIBLE
-            binding.loginButton.visibility = View.VISIBLE
-
-            binding.registerButton.isEnabled = false
-            binding.registerButton.alpha = 0.5f
-            binding.cardView.visibility = View.GONE
-            binding.registerName.visibility = View.GONE
-            binding.registerEmail.visibility = View.GONE
-            binding.registerPassword.visibility = View.GONE
-            binding.registerNewHere.isEnabled = false
-            binding.registerNewHere.alpha = 0.5f
-
-
-            binding.loginButton.setOnClickListener {
-                val loginEmail = binding.loginEmailAddress.text.toString()
-                val loginPassword = binding.loginPassword.text.toString()
-                if (loginEmail.isEmpty() || loginPassword.isEmpty()) {
-                    Toast.makeText(this, "Please Fill All The Details", Toast.LENGTH_SHORT).show()
-                } else {
-                    auth.signInWithEmailAndPassword(loginEmail, loginPassword)
-                        .addOnCompleteListener { task ->
-                            if (task.isSuccessful) {
-                                Toast.makeText(this, "Login Successful 😁", Toast.LENGTH_SHORT)
-                                    .show()
-                                startActivity(Intent(this, MainActivity::class.java))
-                                finish()
-                            } else {
-                                Toast.makeText(
-                                    this,
-                                    "Login Field. Please Enter correct Details",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            }
-                        }
-                }
-            }
-
-        } else if (action == "register") {
-            binding.loginButton.isEnabled = false
-            binding.loginButton.alpha = 0.5f
-
-            binding.registerButton.setOnClickListener {
-                // Get data from edit text fields
-                val registerName = binding.registerName.text.toString().trim()
-                val registerEmail = binding.registerEmail.text.toString().trim()
-                val registerPassword = binding.registerPassword.text.toString().trim()
-
-                if (registerName.isEmpty() || registerEmail.isEmpty() || registerPassword.isEmpty()) {
-                    Toast.makeText(this, "Please fill all the details", Toast.LENGTH_SHORT).show()
-                    return@setOnClickListener
-                }
-
-                if (imageUri == null) {
-                    Toast.makeText(this, "Please select a profile image", Toast.LENGTH_SHORT).show()
-                    return@setOnClickListener
-                }
-
-                // Register the user
-                auth.createUserWithEmailAndPassword(registerEmail, registerPassword)
-                    .addOnCompleteListener { task ->
-                        if (task.isSuccessful) {
-                            val user = auth.currentUser
-                            user?.let {
-                                val userId = user.uid
-                                val userReference = database.getReference("users")
-                                val userData = UserData(registerName, registerEmail)
-
-                                // Save basic user info to Realtime Database
-                                userReference.child(userId).setValue(userData)
-                                    .addOnCompleteListener { dataTask ->
-                                        if (dataTask.isSuccessful) {
-                                            // Upload profile image to Firebase Storage
-                                            val storageRef = storage.reference.child("profile_image/$userId.jpg")
-                                            storageRef.putFile(imageUri!!)
-                                                .addOnCompleteListener { uploadTask ->
-                                                    if (uploadTask.isSuccessful) {
-                                                        // Get image URL and store in DB
-                                                        storageRef.downloadUrl.addOnSuccessListener { downloadUri ->
-                                                            userReference.child(userId)
-                                                                .child("profileImage")
-                                                                .setValue(downloadUri.toString())
-                                                        }.addOnFailureListener {
-                                                            Toast.makeText(this, "Failed to get image URL", Toast.LENGTH_SHORT).show()
-                                                        }
-                                                    } else {
-                                                        Toast.makeText(this, "Image upload failed", Toast.LENGTH_SHORT).show()
-                                                    }
-                                                }
-                                        } else {
-                                            Toast.makeText(this, "Failed to save user data", Toast.LENGTH_SHORT).show()
-                                        }
-                                    }
-
-                                Toast.makeText(this, "User Registered Successfully ✅", Toast.LENGTH_SHORT).show()
-                                auth.signOut() // Optional: auto-logout after registration
-                                startActivity(Intent(this, WelcomeActivity::class.java))
-                                finish()
-                            }
-                        } else {
-                            val errorMessage = task.exception?.localizedMessage ?: "User registration failed"
-                            Toast.makeText(this, errorMessage, Toast.LENGTH_SHORT).show()
-                        }
-                    }
-            }
-
+            setupLoginUI()
+        } else {
+            setupRegistrationUI()
         }
 
-        // set on clicklistner for the Choose image
+        binding.registerNewHere.setOnClickListener {
+            setupRegistrationUI()
+        }
+
+        binding.loginAlreadyHaveAccount.setOnClickListener {
+            setupLoginUI()
+        }
+
         binding.cardView.setOnClickListener {
             val intent = Intent()
             intent.type = "image/*"
             intent.action = Intent.ACTION_GET_CONTENT
-            startActivityForResult(Intent.createChooser(intent, "select Image"), PICK_IMAGE_REQUEST)
+            startActivityForResult(Intent.createChooser(intent, "Select Image"), PICK_IMAGE_REQUEST)
+        }
+
+        binding.loginButton.setOnClickListener {
+            handleLogin()
+        }
+
+        binding.registerButton.setOnClickListener {
+            handleRegistration()
+        }
+    }
+
+    private fun setupLoginUI() {
+        binding.loginContainer.visibility = View.VISIBLE
+        binding.registrationContainer.visibility = View.GONE
+    }
+
+    private fun setupRegistrationUI() {
+        binding.loginContainer.visibility = View.GONE
+        binding.registrationContainer.visibility = View.VISIBLE
+    }
+
+    private fun handleLogin() {
+        val email = binding.loginEmailAddress.text.toString().trim()
+        val password = binding.loginPassword.text.toString().trim()
+
+        if (email.isEmpty() || password.isEmpty()) {
+            Toast.makeText(this, "Please fill all details", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        binding.progressBar.visibility = View.VISIBLE
+        auth.signInWithEmailAndPassword(email, password)
+            .addOnCompleteListener { task ->
+                binding.progressBar.visibility = View.GONE
+                if (task.isSuccessful) {
+                    Toast.makeText(this, "Login Successful!", Toast.LENGTH_SHORT).show()
+                    startActivity(Intent(this, MainActivity::class.java))
+                    finish()
+                } else {
+                    Toast.makeText(this, "Login Failed: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
+                }
+            }
+    }
+
+    private fun handleRegistration() {
+        val name = binding.registerName.text.toString().trim()
+        val email = binding.registerEmail.text.toString().trim()
+        val password = binding.registerPassword.text.toString().trim()
+
+        if (name.isEmpty() || email.isEmpty() || password.isEmpty() || imageUri == null) {
+            Toast.makeText(this, "Please fill all details and select an image", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        binding.progressBar.visibility = View.VISIBLE
+        auth.createUserWithEmailAndPassword(email, password)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    val userId = auth.currentUser?.uid ?: ""
+                    uploadUserData(userId, name, email)
+                } else {
+                    binding.progressBar.visibility = View.GONE
+                    Toast.makeText(this, "Registration Failed: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
+                }
+            }
+    }
+
+    private fun uploadUserData(userId: String, name: String, email: String) {
+        val storageRef = storage.reference.child("profile_images/$userId.jpg")
+        imageUri?.let { uri ->
+            storageRef.putFile(uri).addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    storageRef.downloadUrl.addOnSuccessListener { downloadUri ->
+                        val userData = UserData(name, email, downloadUri.toString())
+                        database.getReference("users").child(userId).setValue(userData)
+                            .addOnCompleteListener { dbTask ->
+                                binding.progressBar.visibility = View.GONE
+                                if (dbTask.isSuccessful) {
+                                    Toast.makeText(this, "Registration Successful!", Toast.LENGTH_SHORT).show()
+                                    startActivity(Intent(this, MainActivity::class.java))
+                                    finish()
+                                } else {
+                                    Toast.makeText(this, "Failed to save user data", Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                    }
+                } else {
+                    binding.progressBar.visibility = View.GONE
+                    Toast.makeText(this, "Image Upload Failed", Toast.LENGTH_SHORT).show()
+                }
+            }
         }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.data != null)
+        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.data != null) {
             imageUri = data.data
-        Glide.with(this)
-            .load(imageUri)
-            .apply(RequestOptions.circleCropTransform())
-            .into(binding.registerUserImage)
+            Glide.with(this)
+                .load(imageUri)
+                .apply(RequestOptions.circleCropTransform())
+                .into(binding.registerUserImage)
+        }
     }
 }

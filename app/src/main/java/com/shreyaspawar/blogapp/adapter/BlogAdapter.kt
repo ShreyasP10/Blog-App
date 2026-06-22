@@ -179,9 +179,9 @@ class BlogAdapter(private val items: MutableList<BlogItemModel>) :
 
     private fun updateLikeButtonImage(binding: BlogItemBinding, liked: Boolean) {
         if (liked) {
-            binding.likeButton.setImageResource(R.drawable.heart_black)
-        } else {
             binding.likeButton.setImageResource(R.drawable.heart_fill_red)
+        } else {
+            binding.likeButton.setImageResource(R.drawable.heart_black)
         }
     }
 
