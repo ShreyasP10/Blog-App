@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FFFFFF</color>
+    <color name="white">#121212</color>
+    <color name="red">#FF8A80</color>
+    <color name="blue">#90CAF9</color>
+    <color name="blue_dark">#64B5F6</color>
+    <color name="light_white">#1A1A1A</color>
+    <color name="dateColor">#B0B0B0</color>
+    <color name="gray_light">#424242</color>
+    <color name="card_background">#242424</color>
+</resources>
