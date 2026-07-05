@@ -2,6 +2,7 @@ package com.shreyaspawar.blogapp
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.View
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.shreyaspawar.blogapp.Model.BlogItemModel
 import com.shreyaspawar.blogapp.adapter.BlogAdapter
@@ -39,9 +40,14 @@ class SavedArticlesActivity : AppCompatActivity() {
                             fetchBlogItemAndAdd(postId)
                         }
                     }
+                    if (!snapshot.hasChildren()) {
+                        binding.emptyView.visibility = View.VISIBLE
+                    }
                 }
                 override fun onCancelled(error: DatabaseError) { }
             })
+        } else {
+            binding.emptyView.visibility = View.VISIBLE
         }
         binding.backButton.setOnClickListener { finish() }
     }
@@ -55,6 +61,7 @@ class SavedArticlesActivity : AppCompatActivity() {
                     blogItem.isSaved = true
                     savedBlogsArticles.add(blogItem)
                     blogAdapter.updateData(savedBlogsArticles)
+                    binding.emptyView.visibility = View.GONE
                 }
             }
             override fun onCancelled(error: DatabaseError) { }

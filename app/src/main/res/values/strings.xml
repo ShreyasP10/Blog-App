@@ -40,4 +40,12 @@
     <string name="edit_blog_title">Edit Your Blog</string>
     <string name="save_blog">Save Blog</string>
     <string name="saved_articles">Saved Articles</string>
+    <string name="no_blogs_yet">No blogs yet. Be the first to write one!</string>
+    <string name="no_saved_articles">No saved articles yet.</string>
+    <string name="no_articles_yet">You haven\'t written any articles yet.</string>
+    <string name="delete_blog_confirm">Are you sure you want to delete this blog post? This action cannot be undone.</string>
+    <string name="delete_blog_title">Delete Blog Post</string>
+    <string name="cancel">Cancel</string>
+    <string name="delete_caps">DELETE</string>
+    <string name="refresh_error">Failed to refresh. Pull down to try again.</string>
 </resources>

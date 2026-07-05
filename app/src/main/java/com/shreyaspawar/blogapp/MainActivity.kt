@@ -3,9 +3,11 @@ package com.shreyaspawar.blogapp
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.View
 import android.widget.SearchView
 import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.bumptech.glide.Glide
 import com.shreyaspawar.blogapp.Model.BlogItemModel
 import com.shreyaspawar.blogapp.adapter.BlogAdapter
@@ -54,26 +56,11 @@ class MainActivity : AppCompatActivity() {
         recyclerView.adapter = blogAdapter
         recyclerView.layoutManager = LinearLayoutManager(this)
 
-        databaseReference.addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                allBlogItems.clear()
-                blogItems.clear()
-                for (snapshot in snapshot.children) {
-                    val blogItem = snapshot.getValue(BlogItemModel::class.java)
-                    if (blogItem != null) {
-                        allBlogItems.add(blogItem)
-                        blogItems.add(blogItem)
-                    }
-                }
-                blogItems.reverse()
-                allBlogItems.reverse()
-                blogAdapter.notifyDataSetChanged()
-            }
+        loadBlogs()
 
-            override fun onCancelled(error: DatabaseError) {
-                Toast.makeText(this@MainActivity, "Blog loading failed", Toast.LENGTH_SHORT).show()
-            }
-        })
+        binding.swipeRefresh.setOnRefreshListener {
+            loadBlogs()
+        }
 
         binding.floatingAddArticleButton.setOnClickListener {
             startActivity(Intent(this, AddArticleActivity::class.java))
@@ -92,6 +79,32 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
+    private fun loadBlogs() {
+        databaseReference.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                allBlogItems.clear()
+                blogItems.clear()
+                for (snapshot in snapshot.children) {
+                    val blogItem = snapshot.getValue(BlogItemModel::class.java)
+                    if (blogItem != null) {
+                        allBlogItems.add(blogItem)
+                        blogItems.add(blogItem)
+                    }
+                }
+                blogItems.reverse()
+                allBlogItems.reverse()
+                blogAdapter.notifyDataSetChanged()
+                binding.swipeRefresh.isRefreshing = false
+                toggleEmptyState()
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                Toast.makeText(this@MainActivity, "Blog loading failed", Toast.LENGTH_SHORT).show()
+                binding.swipeRefresh.isRefreshing = false
+            }
+        })
+    }
+
     private fun filterBlogs(query: String?) {
         blogItems.clear()
         if (query.isNullOrBlank()) {
@@ -102,6 +115,11 @@ class MainActivity : AppCompatActivity() {
             )
         }
         blogAdapter.notifyDataSetChanged()
+        toggleEmptyState()
+    }
+
+    private fun toggleEmptyState() {
+        binding.emptyView.visibility = if (blogItems.isEmpty()) View.VISIBLE else View.GONE
     }
 
     private fun loadUserProfileImage(userId: String) {

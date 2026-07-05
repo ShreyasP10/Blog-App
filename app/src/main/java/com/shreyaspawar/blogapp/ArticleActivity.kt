@@ -1,9 +1,12 @@
 package com.shreyaspawar.blogapp
 
 import android.app.Activity
+import android.content.DialogInterface
 import android.content.Intent
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.View
 import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.shreyaspawar.blogapp.Model.BlogItemModel
@@ -23,7 +26,7 @@ class ArticleActivity : AppCompatActivity() {
     private lateinit var databaseReference: DatabaseReference
     private val auth = FirebaseAuth.getInstance()
     private lateinit var blogAdapter: ArticleAdapter
-    private val EDIT_BLOG_REQUEST_CODE =123
+    private val EDIT_BLOG_REQUEST_CODE = 123
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,7 +53,7 @@ class ArticleActivity : AppCompatActivity() {
             }
 
             override fun onDeleteClick(blogItem: BlogItemModel) {
-                deleteBlogPost(blogItem)
+                showDeleteConfirmationDialog(blogItem)
             }
         })
 
@@ -67,33 +70,41 @@ class ArticleActivity : AppCompatActivity() {
                     }
                 }
                 blogAdapter.setData(blogSavedList)
+                binding.emptyView.visibility = if (blogSavedList.isEmpty()) View.VISIBLE else View.GONE
             }
 
             override fun onCancelled(error: DatabaseError) {
                 Toast.makeText(this@ArticleActivity, "Error loading articles", Toast.LENGTH_SHORT).show()
             }
         })
+    }
 
-
+    private fun showDeleteConfirmationDialog(blogItem: BlogItemModel) {
+        AlertDialog.Builder(this)
+            .setTitle(getString(R.string.delete_blog_title))
+            .setMessage(getString(R.string.delete_blog_confirm))
+            .setPositiveButton(getString(R.string.delete_caps)) { _: DialogInterface, _: Int ->
+                deleteBlogPost(blogItem)
+            }
+            .setNegativeButton(getString(R.string.cancel), null)
+            .show()
     }
 
     private fun deleteBlogPost(blogItem: BlogItemModel) {
         val postId = blogItem.postId
         val blogPostReference = databaseReference.child(postId)
 
-        // remove the blog post
         blogPostReference.removeValue()
             .addOnSuccessListener {
                 Toast.makeText(this, "Blog Post Deleted Successfully", Toast.LENGTH_SHORT).show()
             }.addOnFailureListener {
                 Toast.makeText(this, "Blog Post Deletion Failed", Toast.LENGTH_SHORT).show()
             }
-
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == EDIT_BLOG_REQUEST_CODE && resultCode == Activity.RESULT_OK){
+        if (requestCode == EDIT_BLOG_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
 
         }
     }
