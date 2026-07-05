@@ -22,8 +22,6 @@ class BlogAdapter(private val items: MutableList<BlogItemModel>) :
     RecyclerView.Adapter<BlogAdapter.BLogViewHolder>() {
 
     private val databaseReference: DatabaseReference = FirebaseDatabase.getInstance().reference
-   /* if not working uncomment this line
-       // FirebaseDatabase.getInstance("https://blog-app-147b1-default-rtdb.asia-southeast1.firebasedatabase.app").reference*/
     private val currentUser = FirebaseAuth.getInstance().currentUser
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BLogViewHolder {

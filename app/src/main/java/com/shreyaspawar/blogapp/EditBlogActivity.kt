@@ -45,20 +45,17 @@ class EditBlogActivity : AppCompatActivity() {
 
     private fun updateDataInFirebase(blogItemModel: BlogItemModel) {
 
-        val databaseReference =FirebaseDatabase.getInstance("https://signupsignin-5aea1-default-rtdb.firebaseio.com").getReference("blogs")
-
-        /*if code not working uncomment this line
-        val databaseReference = FirebaseDatabase.getInstance("https://blog-app-147b1-default-rtdb.asia-southeast1.firebasedatabase.app").getReference("blogs")*/
+        val databaseReference = FirebaseDatabase.getInstance().getReference("blogs")
 
         val postId = blogItemModel.postId
 
         databaseReference.child(postId).setValue(blogItemModel)
             .addOnSuccessListener {
-                Toast.makeText(this, "Blog Updated Successful", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Blog Updated Successfully", Toast.LENGTH_SHORT).show()
                 finish()
             }
             .addOnFailureListener {
-                Toast.makeText(this, "Blog Updated Un-Successful", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Blog Update Failed", Toast.LENGTH_SHORT).show()
             }
     }
 }

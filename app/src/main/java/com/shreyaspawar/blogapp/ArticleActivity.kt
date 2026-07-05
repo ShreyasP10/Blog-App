@@ -36,40 +36,33 @@ class ArticleActivity : AppCompatActivity() {
         val recyclerView = binding.articleRecyclerView
         recyclerView.layoutManager = LinearLayoutManager(this)
 
-if (currentUserId != null){
-    blogAdapter = ArticleAdapter(this , emptyList(),object : ArticleAdapter.OnItemClickListener{
-        override fun onEditClick(blogItem: BlogItemModel) {
-            val intent = Intent(this@ArticleActivity ,EditBlogActivity::class.java)
-            intent.putExtra("blogItem" , blogItem)
-            startActivityForResult(intent,EDIT_BLOG_REQUEST_CODE)
-        }
+        blogAdapter = ArticleAdapter(this, emptyList(), object : ArticleAdapter.OnItemClickListener {
+            override fun onEditClick(blogItem: BlogItemModel) {
+                val intent = Intent(this@ArticleActivity, EditBlogActivity::class.java)
+                intent.putExtra("blogItem", blogItem)
+                startActivityForResult(intent, EDIT_BLOG_REQUEST_CODE)
+            }
 
-        override fun onReadMoreClick(blogItem: BlogItemModel) {
+            override fun onReadMoreClick(blogItem: BlogItemModel) {
+                val intent = Intent(this@ArticleActivity, ReadMoreActivity::class.java)
+                intent.putExtra("blogItem", blogItem)
+                startActivity(intent)
+            }
 
-            val intent = Intent(this@ArticleActivity ,ReadMoreActivity::class.java)
-            intent.putExtra("blogItem" , blogItem)
-            startActivity(intent)
-        }
-
-        override fun onDeleteClick(blogItem: BlogItemModel) {
-            deleteBlogPost(blogItem)
-
-        }
-    } )
-}
+            override fun onDeleteClick(blogItem: BlogItemModel) {
+                deleteBlogPost(blogItem)
+            }
+        })
 
         recyclerView.adapter = blogAdapter
 
-        // get saved blog data from Database
         databaseReference = FirebaseDatabase.getInstance().getReference("blogs")
-        /*if code not working uncomment this line
-        databaseReference = FirebaseDatabase.getInstance("https://blog-app-147b1-default-rtdb.asia-southeast1.firebasedatabase.app").getReference("blogs")*/
-        databaseReference.addValueEventListener(object :ValueEventListener{
+        databaseReference.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val blogSavedList = ArrayList<BlogItemModel>()
-                for (postSnapshot in snapshot.children){
+                for (postSnapshot in snapshot.children) {
                     val blogSaved = postSnapshot.getValue(BlogItemModel::class.java)
-                    if (blogSaved != null && currentUserId == blogSaved.userId){
+                    if (blogSaved != null && currentUserId == blogSaved.userId) {
                         blogSavedList.add(blogSaved)
                     }
                 }
@@ -77,7 +70,7 @@ if (currentUserId != null){
             }
 
             override fun onCancelled(error: DatabaseError) {
-                Toast.makeText(this@ArticleActivity, "Error loading Saved blogs", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@ArticleActivity, "Error loading articles", Toast.LENGTH_SHORT).show()
             }
         })
 
@@ -91,9 +84,9 @@ if (currentUserId != null){
         // remove the blog post
         blogPostReference.removeValue()
             .addOnSuccessListener {
-                Toast.makeText(this, "Blog Post Deleted SuccessFully", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Blog Post Deleted Successfully", Toast.LENGTH_SHORT).show()
             }.addOnFailureListener {
-                Toast.makeText(this, "Blog Post Deleted UnSuccessFull", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Blog Post Deletion Failed", Toast.LENGTH_SHORT).show()
             }
 
     }

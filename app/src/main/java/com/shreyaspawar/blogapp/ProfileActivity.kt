@@ -22,33 +22,23 @@ class ProfileActivity : AppCompatActivity() {
     private lateinit var databaseReference: DatabaseReference
     private lateinit var auth: FirebaseAuth
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
-        // to go add article page
         binding.addNewBlogButton.setOnClickListener {
             startActivity(Intent(this, AddArticleActivity::class.java))
         }
-        // to go to Your Article activity
         binding.articlesButton.setOnClickListener {
-            startActivity(Intent(this,ArticleActivity::class.java ))
+            startActivity(Intent(this, ArticleActivity::class.java))
         }
-
-        // to logOut
         binding.logOutButton.setOnClickListener {
             auth.signOut()
-            // navigate
-            startActivity(Intent(this,WelcomeActivity::class.java))
+            startActivity(Intent(this, WelcomeActivity::class.java))
             finish()
         }
 
-
-        // Initialize Firebase
         auth = FirebaseAuth.getInstance()
         databaseReference = FirebaseDatabase.getInstance().reference.child("users")
-        /*if code not working uncomment this line
-                databaseReference = FirebaseDatabase.getInstance("https://blog-app-147b1-default-rtdb.asia-southeast1.firebasedatabase.app").reference.child("users")*/
         val userId = auth.currentUser?.uid
         if (userId != null) {
             loadUserProfileData(userId)
@@ -58,38 +48,23 @@ class ProfileActivity : AppCompatActivity() {
     private fun loadUserProfileData(userId: String) {
         val userReference = databaseReference.child(userId)
 
-        // load user profile Image
-        userReference.child("profileImage").addValueEventListener(object : ValueEventListener {
+        userReference.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                val profileImageUrl = snapshot.getValue(String::class.java)
+                val profileImageUrl = snapshot.child("profileImage").getValue(String::class.java)
                 if (profileImageUrl != null) {
                     Glide.with(this@ProfileActivity)
                         .load(profileImageUrl)
                         .into(binding.userProfile)
                 }
-            }
-
-            override fun onCancelled(error: DatabaseError) {
-                Toast.makeText(this@ProfileActivity, "Failed to load user image 🙃", Toast.LENGTH_SHORT).show()
-            }
-        })
-
-
-        // load user name
-        userReference.child("name").addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                val userName = snapshot.getValue(String::class.java)
-
+                val userName = snapshot.child("name").getValue(String::class.java)
                 if (userName != null) {
                     binding.userName.text = userName
                 }
-
             }
 
             override fun onCancelled(error: DatabaseError) {
-
+                Toast.makeText(this@ProfileActivity, "Failed to load user data", Toast.LENGTH_SHORT).show()
             }
         })
-
     }
 }

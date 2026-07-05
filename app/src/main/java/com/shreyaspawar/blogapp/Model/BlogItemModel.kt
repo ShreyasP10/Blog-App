@@ -24,7 +24,8 @@ data class BlogItemModel(
         parcel.readInt(),
         parcel.readString()?: "null",
         parcel.readByte() != 0.toByte(),
-        parcel.readString() ?:"null"
+        parcel.readString() ?:"null",
+        parcel.createStringArrayList()
     )
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
@@ -37,6 +38,7 @@ data class BlogItemModel(
         parcel.writeString(profileImage)
         parcel.writeByte( if (isSaved) 1 else 0)
         parcel.writeString(postId)
+        parcel.writeStringList(likedBy)
     }
 
     override fun describeContents(): Int {
